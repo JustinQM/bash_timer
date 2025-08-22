@@ -1,0 +1,52 @@
+#!/bin/bash
+
+raw_input=${1,,}
+raw_input=${raw_input//[[:space:]]/}
+
+if [[ ! $raw_input =~ ^([0-9]+[smhd])+$ ]]; then
+    echo "Usage: timer <duration>  e.g. 90m, 5h10m, 1d4h12m" >&2
+    exit 1
+fi
+
+total=0
+rest=$raw_input
+while [[ $rest =~ ^([0-9]+)([smhd])(.*)$ ]]; do
+    n=${BASH_REMATCH[1]}
+    u=${BASH_REMATCH[2]}
+    rest=${BASH_REMATCH[3]}
+    case $u in
+        s) total=$(( total + 10#$n )) ;;
+        m) total=$(( total + 10#$n*60 )) ;;
+        h) total=$(( total + 10#$n*3600 )) ;;
+        d) total=$(( total + 10#$n*86400 )) ;;
+    esac
+done
+
+end=$(( $(date +%s) + total ))
+
+#Countdown
+while :; do
+    now=$(date +%s)
+    rem=$(( end - now ))
+    (( rem > 0 )) || break
+
+    d=$(( rem/86400 ))
+    h=$(( (rem%86400)/3600 ))
+    m=$(( (rem%3600)/60 ))
+    s=$(( rem%60 ))
+
+    if (( d > 0 )); then
+        printf "\r%dd %02d:%02d:%02d  " "$d" "$h" "$m" "$s"
+    else
+        printf "\r%02d:%02d:%02d      " "$h" "$m" "$s"
+    fi
+    sleep 1
+done
+
+if [[ ! -z $2 ]]; then
+    notify-send $2
+else
+    notify-send "Timer Done!"
+fi
+
+echo "Done!"
