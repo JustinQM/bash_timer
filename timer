@@ -53,7 +53,9 @@ fi
 
 if [[ ! -z $2 ]]; then
     "$notify" "$2"
+    printf "%s\n" $2
 else
     "$notify" "Timer Done!"
+    printf "%s\n" $2
 fi
 
