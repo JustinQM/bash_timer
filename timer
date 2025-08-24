@@ -43,10 +43,16 @@ while :; do
     sleep 1
 done
 
-if [[ ! -z $2 ]]; then
-    notify-send $2
+
+if command -v notify-send &>/dev/null; then
+    notify="notify-send"
 else
-    notify-send "Timer Done!"
+    notify="echo"
 fi
 
-echo "Done!"
+if [[ ! -z $2 ]]; then
+    "$notify" "$2"
+else
+    "$notify" "Timer Done!"
+fi
+
